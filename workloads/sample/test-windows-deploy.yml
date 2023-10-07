@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-win
+  labels:
+    app: sample-win
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: sample-win
+      labels:
+        app: sample-win
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": windows
+      tolerations:
+        - key: "os"
+          operator: "Equal"
+          value: "windows"
+          effect: "NoSchedule"
+      containers:
+        - name: sample-win
+          image: ghcr.io/pbering/aspnet48sample:1.0-windowsservercore-ltsc2022
+          resources:
+            requests:
+              cpu: "100m"
+              memory: 100M
+            limits:
+              cpu: "500m"
+              memory: 400M
+          ports:
+            - containerPort: 80
+          env:
+            - name: AAA
+              value: "BBB"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+            timeoutSeconds: 20
+  selector:
+    matchLabels:
+      app: sample-win
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-win
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+  selector:
+    app: sample-win
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-sample-win
+spec:
+  rules:
+  - host: sample.rke2-test.lab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sample-win
+            port:
+              number: 80
+  ingressClassName: nginx
