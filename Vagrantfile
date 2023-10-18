@@ -1,4 +1,4 @@
-Vagrant.require_version ">= 2.3.8.dev" # TODO: remove ".dev" when 2.3.8 is released: https://github.com/hashicorp/vagrant/releases
+Vagrant.require_version ">= 2.4.0"
 
 RKE2_VERSION               = "v1.28.2+rke2r1"
 RKE2_TOKEN                 = "vagrant-rke2"
